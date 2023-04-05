@@ -1,8 +1,11 @@
 package valeriy.khan.parsel.app.auth.dto;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CredentialsItem{
 	private boolean temporary;
 	private String type;

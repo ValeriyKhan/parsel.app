@@ -2,9 +2,9 @@ package valeriy.khan.parsel.app.auth;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import valeriy.khan.parsel.app.auth.dto.FeignSetRoleRequest;
 
 @ConfigurationProperties(prefix = "keycloak.auth")
 @Getter
@@ -16,6 +16,13 @@ public class KeycloakProperties {
     private String grantTypePassword;
     private String grantTypeRefreshToken;
     private String loginUri;
-    private String registerUserLogin;
-    private String registerUserPassword;
+    private String changePasswordUri;
+    private String adminLogin;
+    private String adminPassword;
+    private String roleName;
+    private String roleId;
+
+    public FeignSetRoleRequest getSetRoleRequestBody() {
+        return new FeignSetRoleRequest(roleId, roleName);
+    }
 }

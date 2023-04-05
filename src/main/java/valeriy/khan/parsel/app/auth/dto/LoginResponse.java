@@ -15,7 +15,7 @@ public class LoginResponse {
 	private String refreshToken;
 	@JsonProperty("refresh_expires_in")
 	private double refreshExpiresIn;
-	@JsonProperty("not_before_policy")
+	@JsonProperty("not-before-policy")
 	private double notBeforePolicy;
 	private String scope;
 	@JsonProperty("token_type")
