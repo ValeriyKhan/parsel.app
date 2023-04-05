@@ -19,9 +19,7 @@ import java.security.Principal;
 @RequestMapping("/v1/customer")
 @RequiredArgsConstructor
 public class CustomerController {
-
     private final CustomerService customerService;
-
     @GetMapping
     public ResponseEntity<String> getUser(Principal principal) {
         JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
@@ -29,12 +27,4 @@ public class CustomerController {
         String userEmail = (String) token.getTokenAttributes().get("email");
         return ResponseEntity.ok("Hello User \nUser Name : " + userName + "\nUser Email : " + userEmail);
     }
-
-    @PostMapping("add")
-    public ResponseEntity<CustomerInfo> addNewClient(@Valid CustomerInfo customerInfo) {
-        log.info("Call method addNewClient");
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new CustomerInfo("Customer added"));
-    }
-
 }
