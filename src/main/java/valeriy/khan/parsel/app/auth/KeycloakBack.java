@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import valeriy.khan.parsel.app.auth.dto.*;
@@ -97,14 +98,22 @@ public class KeycloakBack {
         HashMap<String, String> hashMap = mapper.readValue(decoder.decode(chunks[1]), HashMap.class);
         return hashMap.get("sub");
     }
-    public FeignRegisterUserRequest prepareUserRequest(RegisterUserRequest request) {
+
+    public FeignRegisterUserRequest prepareUserRequest(String firstName, String lastName, String username, String password) {
         return FeignRegisterUserRequest.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
+                .firstName(firstName)
+                .lastName(lastName)
                 .emailVerified(false)
-                .credentials(List.of(new CredentialsItem(false, "password", request.getPassword())))
+                .credentials(List.of(new CredentialsItem(false, "password", password)))
                 .enabled(true)
-                .username(request.getUsername())
+                .username(username)
                 .build();
+    }
+
+    public String getAuthorizationHeader(String adminAccessToken) {
+        return "Bearer " + adminAccessToken;
+    }
+    public boolean isFailStatusCode(Response setRoleResponse) {
+        return setRoleResponse.status() < 200 || setRoleResponse.status() > 300;
     }
 }

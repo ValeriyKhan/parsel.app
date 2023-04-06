@@ -20,17 +20,14 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         return authService.login(loginRequest);
     }
-
     @PostMapping("register")
     public ResponseEntity<?> register(@RequestBody RegisterUserRequest request) {
         return authService.registerUser(request);
     }
-
     @PostMapping("tokens")
     public ResponseEntity<?> getTokens(@RequestBody GetTokensRequest request) {
         return authService.getTokens(request);
     }
-
     @PostMapping("change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Principal principal) {
         return authService.changePassword(principal, request);

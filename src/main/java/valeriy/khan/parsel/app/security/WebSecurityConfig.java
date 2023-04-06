@@ -28,6 +28,7 @@ public class WebSecurityConfig {
                 .requestMatchers(POST, "/v1/auth/register/**").permitAll()
                 .requestMatchers(POST, "/v1/auth/tokens/**").permitAll()
                 .requestMatchers(GET, "/v1/customer/**").hasAnyRole(ADMIN.name(), CUSTOMER.name())
+                .requestMatchers(POST, "/v1/admin/add-user/**").hasRole(ADMIN.name())
                 .anyRequest().authenticated();
         http.oauth2ResourceServer()
                 .jwt()

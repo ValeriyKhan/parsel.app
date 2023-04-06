@@ -39,4 +39,8 @@ public class MessageProvider {
     public ResponseEntity<?> wrongPassword() {
         return new ResponseEntity<>(Map.of("error", "Wrong password"), BAD_REQUEST);
     }
+
+    public ResponseEntity<?> permissionDenied() {
+        return new ResponseEntity<>(Map.of("error", "Permission denied"), NOT_ACCEPTABLE);
+    }
 }

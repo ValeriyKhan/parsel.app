@@ -10,6 +10,7 @@ import valeriy.khan.parsel.app.auth.dto.FeignChangePasswordRequest;
 import valeriy.khan.parsel.app.auth.dto.FeignSetRoleRequest;
 import valeriy.khan.parsel.app.auth.dto.FeignRegisterUserRequest;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.*;
@@ -31,7 +32,7 @@ public interface FeignAuthClient {
     Response changePassword(@RequestHeader("Authorization") String authHeader, @RequestBody FeignChangePasswordRequest request, @PathVariable("user-id") String userId);
 
     @RequestMapping(method = POST, value = "${keycloak.auth.set-role-uri}{user-id}/role-mappings/realm", consumes = APPLICATION_JSON_VALUE)
-    Response setRoleToUser(@RequestHeader("Authorization") String authHeader, @RequestBody FeignSetRoleRequest[] request, @PathVariable("user-id") String userId);
+    Response setRoleToUser(@RequestHeader("Authorization") String authHeader, @RequestBody List<FeignSetRoleRequest> request, @PathVariable("user-id") String userId);
 
     @RequestMapping(method = DELETE, value = "${keycloak.auth.delete-user-uri}{user-id}")
     void deleteUser(@RequestHeader("Authorization") String authHeader,@PathVariable("user-id") String userId);

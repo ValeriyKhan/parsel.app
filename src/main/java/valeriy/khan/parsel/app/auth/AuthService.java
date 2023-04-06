@@ -14,7 +14,7 @@ import valeriy.khan.parsel.app.utils.Utils;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static feign.FeignException.*;
@@ -49,11 +49,15 @@ public class AuthService {
     public ResponseEntity<?> registerUser(RegisterUserRequest request) { //Method has Aspect of catching an OpenFeignException
         if (request.getPassword().equals(request.getConfirmPassword())) {
             String adminAccessToken = keycloakBack.getAdminAccessToken(properties);
-            String authorizationHeaderValue = "Bearer " + adminAccessToken;
+            String authorizationHeaderValue = keycloakBack.getAuthorizationHeader(adminAccessToken);
             try {
-                FeignRegisterUserRequest registerUserRequest = keycloakBack.prepareUserRequest(request);
+                FeignRegisterUserRequest registerUserRequest = keycloakBack.prepareUserRequest(
+                        request.getFirstName(),
+                        request.getLastName(),
+                        request.getUsername(),
+                        request.getPassword());
                 Response registerUserResponse = feignAuthClient.registerUser(authorizationHeaderValue, registerUserRequest);
-                if (registerUserResponse.status() <= 200 || registerUserResponse.status() > 300) { //check if register is success
+                if (keycloakBack.isFailStatusCode(registerUserResponse)) { //check if register is success
                     GetTokensResponse tokensResponse = keycloakBack.generateResponse(registerUserResponse);
                     return messageProvider.responseFeignMessage(tokensResponse);
                 }
@@ -65,16 +69,16 @@ public class AuthService {
         return messageProvider.passwordsDontMatch();
     }
 
-    private ResponseEntity<?> setRoleToUser(RegisterUserRequest request, String authorizationHeaderValue) throws IOException {
+    private ResponseEntity<?> setRoleToUser(RegisterUserRequest request, String authorizationHeaderValue) {
         try {
             ResponseEntity<?> login = login(new LoginRequest(request.getUsername(), request.getPassword()));
             ObjectMapper mapper = new ObjectMapper();
             LoginResponse loginResponse = mapper.convertValue(login.getBody(), LoginResponse.class);
             String userId = keycloakBack.getUserId(loginResponse);
             if (login.getStatusCode().is2xxSuccessful()) {
-                FeignSetRoleRequest[] arrayBody = {properties.getSetRoleRequestBody()};
-                Response setRoleResponse = feignAuthClient.setRoleToUser(authorizationHeaderValue, arrayBody, userId);
-                if (setRoleResponse.status() >= 200 && setRoleResponse.status() < 300) {
+                List<FeignSetRoleRequest> roleCustomer = List.of(properties.getRoleCustomer());
+                Response setRoleResponse = feignAuthClient.setRoleToUser(authorizationHeaderValue, roleCustomer, userId);
+                if (!keycloakBack.isFailStatusCode(setRoleResponse)) {
                     GetTokensResponse response = keycloakBack.generateResponse(setRoleResponse);
                     return messageProvider.responseFeignMessage(response);
                 }
@@ -111,19 +115,19 @@ public class AuthService {
                     properties.getGrantTypePassword());
             try {
                 Response loginResponse = feignAuthClient.login(requestBodyWithLoginAndPassword);
-                if (loginResponse.status() < 200 || loginResponse.status() > 300) {
+                if (keycloakBack.isFailStatusCode(loginResponse)) {
                     GetTokensResponse tokensResponse = keycloakBack.generateResponse(loginResponse);
                     return messageProvider.responseFeignMessage(tokensResponse);
                 }
                 String adminAccessToken = keycloakBack.getAdminAccessToken(properties);
-                String authHeader = "Bearer " + adminAccessToken;
+                String authorizationHeader = keycloakBack.getAuthorizationHeader(adminAccessToken);
                 FeignChangePasswordRequest feignChangePasswordRequest = FeignChangePasswordRequest.builder()
                         .password(request.getNewPassword())
                         .temporary(false)
                         .type("password")
                         .build();
                 String userId = (String) token.getTokenAttributes().get("sub");
-                Response changePasswordResponse = feignAuthClient.changePassword(authHeader, feignChangePasswordRequest, userId);
+                Response changePasswordResponse = feignAuthClient.changePassword(authorizationHeader, feignChangePasswordRequest, userId);
                 GetTokensResponse tokensResponse = keycloakBack.generateResponse(changePasswordResponse);
                 return messageProvider.responseFeignMessage(tokensResponse);
             } catch (FeignClientException ex) {
