@@ -64,6 +64,7 @@ public class AuthService {
                 return setRoleToUser(request, authorizationHeaderValue);
             } catch (Exception ex) {
                 return messageProvider.failedRegisterUser();
+
             }
         }
         return messageProvider.passwordsDontMatch();
